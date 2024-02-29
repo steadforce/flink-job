@@ -1,0 +1,35 @@
+name: Create and publish kafka producer container image
+
+on:
+  push:
+    branches:
+    - "**"
+  pull_request:
+    branches:
+    - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+      - run: mvn clean package -DskipTests
+      - run: mkdir staging && cp target/*.jar staging
+      - uses: actions/upload-artifact@v3
+        with:
+            name: Package
+            path: staging
+            retention-days: 1
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: "${{ secrets.YOUR-GITHUB-TOKEN }}"
+          automatic_release_tag: "${{ github.run_number }}"
+          title: "Automated Build ${{ github.run_number }}"
+          prerelease: true
+          files: staging/*.jar
+    
