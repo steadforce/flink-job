@@ -118,7 +118,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>com.steadforce.App</mainClass>
+                <mainClass>com.steadforce.flink_job.App</mainClass>
               </manifest>
             </archive>
           </configuration>
@@ -143,11 +143,4 @@
       </plugins>
     </pluginManagement>
   </build>
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/steadforce/flink-job</url>
-    </repository>
-  </distributionManagement>
 </project>
