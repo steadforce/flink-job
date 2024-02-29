@@ -8,6 +8,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.api.java.utils;
 import static org.apache.flink.table.api.Expressions.$;
 import com.steadforce.flink_job.JobData;
 import java.lang.*;
@@ -20,11 +21,12 @@ public class App
 {
   public static void main(String[] args) throws Exception {
 
-        String nessieHost = System.getenv("NESSIE_HOST");
-        String nessiePort = System.getenv("NESSIE_PORT");
-        String minioHost = System.getenv("MINIO_HOST");
-        String minioPort = System.getenv("MINIO_PORT");
-        String warehouse = System.getenv("WAREHOUSE");
+        ParameterTool parameter = ParameterTool.fromArgs(args);
+
+        String nessieHost = parameter.get("NESSIE_HOST");
+        String minioHost = parameter.get("MINIO_HOST");
+        String warehouse = parameter.get("WAREHOUSE");
+
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // set up the table environment
@@ -39,12 +41,12 @@ public class App
                         + "'type'='iceberg',"
                         + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='http://%s:%s/api/v1',"
+                        + "'uri'='%s',"
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
-                        + "'s3.endpoint'='http://%s:%s'"
-                        + "'warehouse' = 's3://%s',"
-                        + ")", nessieHost, nessiePort, minioHost, minioPort, warehouse));
+                        + "'s3.endpoint'='%s'"
+                        + "'warehouse'='%s',"
+                        + ")", nessieHost, minioHost, warehouse));
 
 
         // List all catalogs
