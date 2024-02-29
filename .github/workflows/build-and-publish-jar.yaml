@@ -8,6 +8,11 @@ on:
     branches:
     - "main"
 
+env:
+  WORKING_DIRECTORY: flink_job
+  REGISTRY: ghcr.io
+  IMAGE_NAME: trino-query-executor
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,11 +24,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - run: mvn clean package -DskipTests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
       - run: mkdir staging && cp target/*.jar staging
+        working-directory: ${{ env.WORKING_DIRECTORY }}
       - uses: actions/upload-artifact@v3
         with:
             name: Package
-            path: staging
+            path: ${{ env.WORKING_DIRECTORY }}/staging
             retention-days: 1
       - uses: marvinpinto/action-automatic-releases@latest
         with:
@@ -31,5 +38,5 @@ jobs:
           automatic_release_tag: "${{ github.run_number }}"
           title: "Automated Build ${{ github.run_number }}"
           prerelease: true
-          files: staging/*.jar
+          files: ${{ env.WORKING_DIRECTORY }}/staging/*.jar
     
