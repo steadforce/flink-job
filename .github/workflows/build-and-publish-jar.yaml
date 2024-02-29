@@ -4,6 +4,9 @@ on:
   push:
     branches:
     - "**"
+    paths:
+      - flink_job/**
+      - .github/workflows/build-and-publish-jar.yaml
   pull_request:
     branches:
     - "main"
