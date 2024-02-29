@@ -44,7 +44,7 @@ public class App
                         + "'uri'='%s',"
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
-                        + "'s3.endpoint'='%s'"
+                        + "'s3.endpoint'='%s',"
                         + "'warehouse'='%s'"
                         + ")", nessieHost, minioHost, warehouse));
 
