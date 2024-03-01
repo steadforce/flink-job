@@ -27,6 +27,8 @@ public class App
         String minioHost = parameter.get("MINIO_HOST");
         String warehouse = parameter.get("WAREHOUSE");
 
+        System.out.printf("nessie host: %s%nminio host: %s%nwarehouse: %s%n", nessieHost, minioHost, warehouse);
+
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // set up the table environment
