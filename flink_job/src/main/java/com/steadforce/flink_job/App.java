@@ -39,16 +39,16 @@ public class App
 
         // create the Nessie catalog
         tableEnv.executeSql(
-                String.format("CREATE CATALOG iceberg WITH ("
+                "CREATE CATALOG iceberg WITH ("
                         + "'type'='iceberg',"
                         + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='%s',"
+                        + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
-                        + "'s3.endpoint'='%s',"
-                        + "'warehouse'='%s'"
-                        + ")", nessieHost, minioHost, warehouse));
+                        + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80',"
+                        + "'warehouse'='s3a://sensor/flink'"
+                        + ")");
 
 
         // List all catalogs
