@@ -92,9 +92,36 @@
 </dependencies>
 
   <build>
+  <plugins>
+        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+          <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.2</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <artifactSet>
+              <includes>
+                  <include>org.apache.flink:*</include>
+                  <include>software.amazon.awssdk:bundle</include>
+                  <include>software.amazon.awssdk:url-connection-client</include>
+                  <include>org.apache.iceberg:*</include>
+                  <include>org.apache.hadoop:*</include>
+              </includes>
+          </artifactSet>
+        </configuration>
+        </plugin>
+      </plugins>
+
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
-        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
