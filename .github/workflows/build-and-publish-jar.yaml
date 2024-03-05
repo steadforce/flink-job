@@ -1,4 +1,4 @@
-name: Create and publish kafka producer container image
+name: Create and publish flink job jar file
 
 on:
   push:
@@ -15,8 +15,6 @@ permissions: write-all
 
 env:
   WORKING_DIRECTORY: flink_job
-  REGISTRY: ghcr.io
-  IMAGE_NAME: trino-query-executor
 
 jobs:
   build:

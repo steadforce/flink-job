@@ -21,13 +21,11 @@ public class App
 {
   public static void main(String[] args) throws Exception {
 
-        ParameterTool parameter = ParameterTool.fromArgs(args);
-
-        String nessieHost = parameter.get("NESSIE_HOST");
-        String minioHost = parameter.get("MINIO_HOST");
-        String warehouse = parameter.get("WAREHOUSE");
-
-        System.out.printf("nessie host: %s%nminio host: %s%nwarehouse: %s%n", nessieHost, minioHost, warehouse);
+        String nessieHost = System.getenv("NESSIE_HOST");
+        String minioHost = System.getenv("MINIO_HOST");
+        String minioAccessKey = System.getenv("MINIO_ACCESS_KEY");
+        String minioSecretKey = System.getenv("MINIO_SECRET_KEY");
+        String warehouse = System.getenv("WAREHOUSE");
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -36,19 +34,20 @@ public class App
                 env,
                 EnvironmentSettings.newInstance().inStreamingMode().build());
 
-
         // create the Nessie catalog
         tableEnv.executeSql(
+                String.format(
                 "CREATE CATALOG iceberg WITH ("
                         + "'type'='iceberg',"
                         + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
-                        + "'authentication.type'='none',"
+                        + "'uri'='%s',"
                         + "'ref'='main',"
-                        + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80',"
-                        + "'warehouse'='s3a://sensor/flink'"
-                        + ")");
+                        + "'s3.endpoint'='%s',"
+                        + "'s3.access-key'='%s',"
+                        + "'s3.secret-key'='%s',"
+                        + "'warehouse'='%s'"
+                        + ")", nessieHost, minioHost, minioAccessKey, minioSecretKey, warehouse));
 
 
         // List all catalogs
