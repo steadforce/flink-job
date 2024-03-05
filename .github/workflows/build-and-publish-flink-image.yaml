@@ -39,7 +39,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/steadforce/steadops/workbenches/${{ env.IMAGE_NAME }}
+        images: ${{ env.REGISTRY }}/steadforce/applications/${{ env.IMAGE_NAME }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
