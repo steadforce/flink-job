@@ -23,8 +23,6 @@ public class App
 
         String nessieHost = System.getenv("NESSIE_HOST");
         String minioHost = System.getenv("MINIO_HOST");
-        String minioAccessKey = System.getenv("MINIO_ACCESS_KEY");
-        String minioSecretKey = System.getenv("MINIO_SECRET_KEY");
         String warehouse = System.getenv("WAREHOUSE");
 
         // set up the execution environment
@@ -43,12 +41,10 @@ public class App
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
                         + "'uri'='%s',"
                         + "'ref'='main',"
-                         + "'client.assume-role.region'='us-east-1',"
+                        + "'client.assume-role.region'='us-east-1',"
                         + "'s3.endpoint'='%s',"
-                        + "'s3.access-key'='%s',"
-                        + "'s3.secret-key'='%s',"
                         + "'warehouse'='%s'"
-                        + ")", nessieHost, minioHost, minioAccessKey, minioSecretKey, warehouse));
+                        + ")", nessieHost, minioHost, warehouse));
 
 
         // List all catalogs
