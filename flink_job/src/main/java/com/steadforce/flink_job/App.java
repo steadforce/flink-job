@@ -22,7 +22,6 @@ public class App
   public static void main(String[] args) throws Exception {
 
         String nessieHost = System.getenv("NESSIE_HOST");
-        String minioHost = System.getenv("MINIO_HOST");
         String warehouse = System.getenv("WAREHOUSE");
 
         // set up the execution environment
@@ -43,10 +42,8 @@ public class App
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
                         + "'client.assume-role.region'='us-east-1',"
-                        + "'s3.endpoint'='%s',"
-                        + "'s3.path.style.access'='true',"
                         + "'warehouse'='%s'"
-                        + ")", nessieHost, minioHost, warehouse));
+                        + ")", nessieHost, warehouse));
 
 
         // List all catalogs
