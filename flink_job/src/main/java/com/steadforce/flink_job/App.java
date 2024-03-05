@@ -40,6 +40,7 @@ public class App
                         + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
                         + "'uri'='%s',"
+                        + "'authentication.type'='none',"
                         + "'ref'='main',"
                         + "'client.assume-role.region'='us-east-1',"
                         + "'s3.endpoint'='%s',"
