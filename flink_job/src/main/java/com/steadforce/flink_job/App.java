@@ -43,6 +43,7 @@ public class App
                         + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
                         + "'uri'='%s',"
                         + "'ref'='main',"
+                         + "'client.assume-role.region'='us-east-1',"
                         + "'s3.endpoint'='%s',"
                         + "'s3.access-key'='%s',"
                         + "'s3.secret-key'='%s',"
