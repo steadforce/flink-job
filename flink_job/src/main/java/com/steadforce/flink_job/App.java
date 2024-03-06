@@ -50,7 +50,8 @@ public class App
                         + "'ref'='main',"
                         + "'client.assume-role.region'='us-east-1',"
                         + "'warehouse'='%s',"
-                        + "'s3.endpoint'='%s'"
+                        + "'s3.endpoint'='%s',"
+                        + "'s3.path.style.access'='true'"
                         + ")", nessieHost, warehouse, minioHost));
 
 
