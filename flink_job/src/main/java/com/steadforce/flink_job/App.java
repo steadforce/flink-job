@@ -100,19 +100,24 @@ public static void main(String[] args) throws Exception {
 
         // Add Kafka source as a data source
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
+        System.out.println("STREAM");
         System.out.println(kafkaStream);
 
         // Filter manipulated and complete rows
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        System.out.println("MANIPULATED");
+        System.out.println(manipulatedRowsStream);
+        System.out.println("COMPLETE");
+        System.out.println(completeRowsStream);
 
         // Convert the DataStream to a Table
-        Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
-        Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
+        //Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
+        //Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
 
         // Register the Table as a temporary view
-        tableEnv.createTemporaryView("my_complete_table", complete_table);
-        tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
+        //tableEnv.createTemporaryView("my_complete_table", complete_table);
+        //tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
         // Create the Nessie catalog
         tableEnv.executeSql(
@@ -132,38 +137,38 @@ public static void main(String[] args) throws Exception {
 
 
         // List all catalogs
-        TableResult result = tableEnv.executeSql("SHOW CATALOGS");
+        //TableResult result = tableEnv.executeSql("SHOW CATALOGS");
 
         // Print the result to standard out
-        result.print();
+        //result.print();
 
         // Set the current catalog to the new catalog
-        tableEnv.useCatalog("iceberg");
+        //tableEnv.useCatalog("iceberg");
 
         // Create a database in the current catalog
-        tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db");
+        //tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db");
 
         // Create the tables
-        tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db.complete_table ("
-                        + "id BIGINT COMMENT 'unique id',"
-                        + "data STRING"
-                        + ")");
+        //tableEnv.executeSql(
+        //        "CREATE TABLE IF NOT EXISTS db.complete_table ("
+        //                + "id BIGINT COMMENT 'unique id',"
+        //                + "data STRING"
+        //                + ")");
 
-        tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-                        + "id BIGINT COMMENT 'unique id',"
-                        + "data STRING"
-                        + ")");
+        //tableEnv.executeSql(
+        //        "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
+        //               + "id BIGINT COMMENT 'unique id',"
+        //                + "data STRING"
+        //                + ")");
 
         // Write the DataStream to the tables
-        tableEnv.executeSql(
-                "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
+        //tableEnv.executeSql(
+        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
-        tableEnv.executeSql(
-                "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
+        //tableEnv.executeSql(
+        //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
 
         // Execute the job
-        env.execute("Flink Job");
+        //env.execute("Flink Job");
    }
 }
