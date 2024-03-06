@@ -27,7 +27,7 @@ public class App
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
 
-        Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf/flink-conf.yaml");
+        Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf");
         FileSystem.initialize(loadedConfig, null);
 
         // set up the execution environment
