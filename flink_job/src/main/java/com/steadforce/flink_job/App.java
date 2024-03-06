@@ -26,6 +26,7 @@ public class App
 
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
+        String minioHost = System.getenv("S3_ENDPOINT");
 
         Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf");
         FileSystem.initialize(loadedConfig, null);
@@ -48,8 +49,9 @@ public class App
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
                         + "'client.assume-role.region'='us-east-1',"
-                        + "'warehouse'='%s'"
-                        + ")", nessieHost, warehouse));
+                        + "'warehouse'='%s',"
+                        + "'s3.endpoint'='%s'"
+                        + ")", nessieHost, warehouse, minioHost));
 
 
         // List all catalogs
