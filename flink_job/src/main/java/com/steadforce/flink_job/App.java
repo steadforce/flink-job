@@ -24,8 +24,11 @@ public class App
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
 
+        Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf/flink-conf.yaml");
+        FileSystem.initialize(config, null);
+
         // set up the execution environment
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(loadedConfig);
         // set up the table environment
         final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
                 env,
