@@ -9,6 +9,9 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.GlobalConfiguration;
+import org.apache.flink.core.fs.FileSystem;
 import static org.apache.flink.table.api.Expressions.$;
 import com.steadforce.flink_job.JobData;
 import java.lang.*;
@@ -25,7 +28,7 @@ public class App
         String warehouse = System.getenv("WAREHOUSE");
 
         Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf/flink-conf.yaml");
-        FileSystem.initialize(config, null);
+        FileSystem.initialize(loadedConfig, null);
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(loadedConfig);
