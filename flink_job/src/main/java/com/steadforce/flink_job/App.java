@@ -72,7 +72,7 @@ public static void main(String[] args) throws Exception {
         String kafkaSchemaRegistryUrl = parameter.get("KAFKA_SCHEMA_REGISTRY_URL");
         String kafkaConsumerGroup = parameter.get("KAFKA_CONSUMER_GROUP");
 
-        //String kafkaBootstrapServers = "https://localhost:80";
+        //String kafkaBootstrapServers = "https://localhost:9092";
         //String kafkaTopic = "steadforce.tools";
         //String kafkaConsumerGroup = "demo-consumer-group";
 
@@ -82,9 +82,9 @@ public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // Set up the table environment
-        final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
-                env,
-                EnvironmentSettings.newInstance().inStreamingMode().build());
+        //final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
+        //        env,
+        //        EnvironmentSettings.newInstance().inStreamingMode().build());
 
         // Create KafkaSource builder
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
@@ -97,66 +97,71 @@ public static void main(String[] args) throws Exception {
 
         // Add Kafka source as a data source
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
+        System.out.println("STREAM");
         System.out.println(kafkaStream);
 
         // Filter manipulated and complete rows
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        System.out.println("MANIPULATED");
+        System.out.println(manipulatedRowsStream);
+        System.out.println("COMPLETE");
+        System.out.println(completeRowsStream);
 
         // Convert the DataStream to a Table
-        Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
-        Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
+        //Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
+        //Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
 
         // Register the Table as a temporary view
-        tableEnv.createTemporaryView("my_complete_table", complete_table);
-        tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
+        //tableEnv.createTemporaryView("my_complete_table", complete_table);
+        //tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
         // Create the Nessie catalog
-        tableEnv.executeSql(
-                "CREATE CATALOG iceberg WITH ("
-                        + "'type'='iceberg',"
-                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
-                        + "'authentication.type'='none',"
-                        + "'ref'='main',"
-                        + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80',"
-                        + "'warehouse'='s3a://sensor/flink'"
-                        + ")");
+        //tableEnv.executeSql(
+        //        "CREATE CATALOG iceberg WITH ("
+        //                + "'type'='iceberg',"
+        //                + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+        //                + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
+        //                + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
+        //                + "'authentication.type'='none',"
+        //                + "'ref'='main',"
+        //                + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80',"
+        //                + "'warehouse'='s3a://sensor/flink'"
+        //                + ")");
 
         // List all catalogs
-        TableResult result = tableEnv.executeSql("SHOW CATALOGS");
+        //TableResult result = tableEnv.executeSql("SHOW CATALOGS");
 
         // Print the result to standard out
-        result.print();
+        //result.print();
 
         // Set the current catalog to the new catalog
-        tableEnv.useCatalog("iceberg");
+        //tableEnv.useCatalog("iceberg");
 
         // Create a database in the current catalog
-        tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db");
+        //tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db");
 
         // Create the tables
-        tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db.complete_table ("
-                        + "id BIGINT COMMENT 'unique id',"
-                        + "data STRING"
-                        + ")");
+        //tableEnv.executeSql(
+        //        "CREATE TABLE IF NOT EXISTS db.complete_table ("
+        //                + "id BIGINT COMMENT 'unique id',"
+        //                + "data STRING"
+        //                + ")");
 
-        tableEnv.executeSql(
-                "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-                        + "id BIGINT COMMENT 'unique id',"
-                        + "data STRING"
-                        + ")");
+        //tableEnv.executeSql(
+        //        "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
+        //               + "id BIGINT COMMENT 'unique id',"
+        //                + "data STRING"
+        //                + ")");
 
         // Write the DataStream to the tables
-        tableEnv.executeSql(
-                "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
+        //tableEnv.executeSql(
+        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
-        tableEnv.executeSql(
-                "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
+        //tableEnv.executeSql(
+        //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
 
         // Execute the job
-        env.execute("Flink Job");
+        //env.execute("Flink Job");
    }
 }
