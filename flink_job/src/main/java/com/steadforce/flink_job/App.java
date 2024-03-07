@@ -121,24 +121,25 @@ public static void main(String[] args) throws Exception {
 
         // Add Kafka source as a data source
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        System.out.println("STREAM");
-        System.out.println(kafkaStream);
+        kafkaStream.print();
+        // System.out.println("STREAM");
+        // System.out.println(kafkaStream);
 
-        // Filter manipulated and complete rows
-        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
-        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
-        System.out.println("MANIPULATED");
-        System.out.println(manipulatedRowsStream);
-        System.out.println("COMPLETE");
-        System.out.println(completeRowsStream);
+        // // Filter manipulated and complete rows
+        // DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
+        // DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        // System.out.println("MANIPULATED");
+        // System.out.println(manipulatedRowsStream);
+        // System.out.println("COMPLETE");
+        // System.out.println(completeRowsStream);
 
-        // Convert the DataStream to a Table
-        Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
-        Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
+        // // Convert the DataStream to a Table
+        // Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
+        // Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
 
-        // Register the Table as a temporary view
-        tableEnv.createTemporaryView("my_complete_table", complete_table);
-        tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
+        // // Register the Table as a temporary view
+        // tableEnv.createTemporaryView("my_complete_table", complete_table);
+        // tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
         // Create the tables
         //tableEnv.executeSql(
