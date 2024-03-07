@@ -35,20 +35,34 @@ public class App
                 env,
                 EnvironmentSettings.newInstance().inStreamingMode().build());
 
+        // // create the Nessie catalog
+        // tableEnv.executeSql(
+        //         String.format(
+        //         "CREATE CATALOG iceberg WITH ("
+        //                 + "'type'='iceberg',"
+        //                 + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+        //                 + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
+        //                 + "'uri'='%s',"
+        //                 + "'authentication.type'='none',"
+        //                 + "'ref'='main',"
+        //                 + "'client.assume-role.region'='us-east-1',"
+        //                 + "'warehouse'='%s',"
+        //                 + "'s3.endpoint'='%s'"
+        //                 + ")", nessieHost, warehouse, minioHost));
+
         // create the Nessie catalog
-        tableEnv.executeSql(
-                String.format(
-                "CREATE CATALOG iceberg WITH ("
-                        + "'type'='iceberg',"
-                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='%s',"
-                        + "'authentication.type'='none',"
-                        + "'ref'='main',"
-                        + "'client.assume-role.region'='us-east-1',"
-                        + "'warehouse'='%s',"
-                        + "'s3.endpoint'='%s'"
-                        + ")", nessieHost, warehouse, minioHost));
+       tableEnv.executeSql(
+               "CREATE CATALOG iceberg WITH ("
+                       + "'type'='iceberg',"
+                       + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+                       + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
+                       + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
+                       + "'authentication.type'='none',"
+                       + "'ref'='main',"
+                       + "'client.assume-role.region'='us-east-1',"
+                       + "'warehouse' = 's3://warehouse',"
+                       + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80'"
+                       + ")");
 
 
         // List all catalogs
