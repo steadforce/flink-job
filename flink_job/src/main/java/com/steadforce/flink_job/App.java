@@ -121,13 +121,12 @@ public static void main(String[] args) throws Exception {
 
         // Add Kafka source as a data source
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        kafkaStream.print();
-        // System.out.println("STREAM");
-        // System.out.println(kafkaStream);
 
         // // Filter manipulated and complete rows
-        // DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
-        // DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
+        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+
+        manipulatedRowsStream.print();
         // System.out.println("MANIPULATED");
         // System.out.println(manipulatedRowsStream);
         // System.out.println("COMPLETE");
