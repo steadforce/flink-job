@@ -126,7 +126,9 @@ public static void main(String[] args) throws Exception {
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
 
-        manipulatedRowsStream.print();
+        // manipulatedRowsStream.print();
+        completeRowsStream.print();
+
         // System.out.println("MANIPULATED");
         // System.out.println(manipulatedRowsStream);
         // System.out.println("COMPLETE");
