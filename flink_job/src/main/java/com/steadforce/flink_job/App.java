@@ -60,7 +60,7 @@ public class App
                        + "'authentication.type'='none',"
                        + "'ref'='main',"
                        + "'client.assume-role.region'='us-east-1',"
-                       + "'warehouse' = 's3://warehouse',"
+                       + "'warehouse' = 's3://steadops-playground-bucket',"
                        + "'s3.endpoint'='http://minio.minio.svc.cluster.local:80'"
                        + ")");
 
