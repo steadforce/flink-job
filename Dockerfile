@@ -13,7 +13,7 @@ RUN curl -L https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.6
     ## AWS Bundled Classes
     curl -L https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.25.1/bundle-2.25.1.jar -o /opt/flink/lib/bundle-2.25.1.jar && \
     ## Kafka Connector
-    curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.1.0-1.18/flink-connector-kafka-3.1.0-1.18.jar  -o /opt/flink/lib/flink-connector-kafka-3.1.0-1.18.jar
+    curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.1.0-1.18/flink-sql-connector-kafka-3.1.0-1.18.jar  -o /opt/flink/lib/flink-sql-connector-kafka-3.1.0-1.18.jar
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
