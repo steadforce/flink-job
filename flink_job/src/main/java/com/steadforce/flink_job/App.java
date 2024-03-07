@@ -26,7 +26,7 @@ public class App
 
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
-        String minioHost = System.getenv("S3_ENDPOINT");
+        String minioHost = System.getenv("MINIO_HOST");
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -49,21 +49,6 @@ public class App
                         + "'warehouse'='%s',"
                         + "'s3.endpoint'='%s'"
                         + ")", nessieHost, warehouse, minioHost));
-
-        // create the Nessie catalog
-//        tableEnv.executeSql(
-//                "CREATE CATALOG iceberg WITH ("
-//                        + "'type'='iceberg',"
-//                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-//                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-//                        + "'uri'='http://nessie.nessie.svc.cluster.local:19120/api/v1',"
-//                        + "'authentication.type'='none',"
-//                        + "'ref'='main',"
-//                        + "'client.assume-role.region'='us-east-1',"
-//                        + "'warehouse' = 's3://steadops-playground-bucket',"
-//                        + "'s3.endpoint'='http://minio.svc.cluster.local:80'"
-//                        + ")");
-
 
         // List all catalogs
         TableResult result = tableEnv.executeSql("SHOW CATALOGS");
