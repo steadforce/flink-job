@@ -67,10 +67,10 @@ public static boolean isManipulatedRow(String row) {
 public static void main(String[] args) throws Exception {
         ParameterTool parameter = ParameterTool.fromArgs(args);
 
-        String kafkaBootstrapServers = parameter.get("KAFKA_BOOTSTRAP_SERVERS");
-        String kafkaTopic = parameter.get("KAFKA_TOPIC");
-        String kafkaSchemaRegistryUrl = parameter.get("KAFKA_SCHEMA_REGISTRY_URL");
-        String kafkaConsumerGroup = parameter.get("KAFKA_CONSUMER_GROUP");
+        String kafkaBootstrapServers = System.getenv("KAFKA_BOOTSTRAP_SERVERS");
+        String kafkaTopic = System.getenv("KAFKA_TOPIC");
+        String kafkaSchemaRegistryUrl = System.getenv("KAFKA_SCHEMA_REGISTRY_URL");
+        String kafkaConsumerGroup = System.getenv("KAFKA_CONSUMER_GROUP");
 
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
@@ -85,9 +85,9 @@ public static void main(String[] args) throws Exception {
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(loadedConfig);
         // set up the table environment
-        final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
-                env,
-                EnvironmentSettings.newInstance().inStreamingMode().build());
+        // final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
+        //         env,
+        //         EnvironmentSettings.newInstance().inStreamingMode().build());
 
         // Create KafkaSource builder
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
@@ -120,20 +120,20 @@ public static void main(String[] args) throws Exception {
         //tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
         // Create the Nessie catalog
-        tableEnv.executeSql(
-                String.format(
-                "CREATE CATALOG iceberg WITH ("
-                        + "'type'='iceberg',"
-                        + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-                        + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-                        + "'uri'='%s',"
-                        + "'authentication.type'='none',"
-                        + "'ref'='main',"
-                        + "'client.assume-role.region'='us-east-1',"
-                        + "'warehouse'='%s',"
-                        + "'s3.endpoint'='%s',"
-                        + "'s3.path.style.access'='true'"
-                        + ")", nessieHost, warehouse, minioHost));
+        // tableEnv.executeSql(
+        //         String.format(
+        //         "CREATE CATALOG iceberg WITH ("
+        //                 + "'type'='iceberg',"
+        //                 + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
+        //                 + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
+        //                 + "'uri'='%s',"
+        //                 + "'authentication.type'='none',"
+        //                 + "'ref'='main',"
+        //                 + "'client.assume-role.region'='us-east-1',"
+        //                 + "'warehouse'='%s',"
+        //                 + "'s3.endpoint'='%s',"
+        //                 + "'s3.path.style.access'='true'"
+        //                 + ")", nessieHost, warehouse, minioHost));
 
 
         // List all catalogs
