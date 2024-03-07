@@ -27,19 +27,9 @@ public class App
         String nessieHost = System.getenv("NESSIE_HOST");
         String warehouse = System.getenv("WAREHOUSE");
         String minioHost = System.getenv("S3_ENDPOINT");
-        String awsAccessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
-        String awsSecretAccessKey = System.getenv("AWS_SECRET_ACCESS_KEY");
-
-        System.setProperty("fs.s3a.endpoint", minioHost);
-        System.setProperty("fs.s3a.access.key", awsAccessKeyId);
-        System.setProperty("fs.s3a.secret.key", awsSecretAccessKey);
-        System.setProperty("fs.s3a.path.style.access", "true");
-
-        Configuration loadedConfig = GlobalConfiguration.loadConfiguration("/opt/flink/conf");
-        FileSystem.initialize(loadedConfig, null);
 
         // set up the execution environment
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(loadedConfig);
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         // set up the table environment
         final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
                 env,
@@ -55,8 +45,10 @@ public class App
                         + "'uri'='%s',"
                         + "'authentication.type'='none',"
                         + "'ref'='main',"
-                        + "'warehouse'='%s'"
-                        + ")", nessieHost, warehouse));
+                        + "'client.assume-role.region'='us-east-1',"
+                        + "'warehouse'='%s',"
+                        + "'s3.endpoint'='%s'"
+                        + ")", nessieHost, warehouse, minioHost));
 
 
         // List all catalogs
