@@ -98,9 +98,8 @@
 </dependencies>
 
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
-           <plugin>
+       <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
             <version>3.1.1</version>
@@ -128,7 +127,7 @@
                         <transformers>
                             <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                 <!-- Replace this with the main class of your job -->
-                                <mainClass>my.programs.main.clazz</mainClass>
+                                 <mainClass>com.steadforce.flink_job.App</mainClass>
                             </transformer>
                             <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                         </transformers>
@@ -136,6 +135,9 @@
                 </execution>
             </executions>
         </plugin>
+      </plugins>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
