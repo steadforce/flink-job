@@ -25,47 +25,36 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Iterator;
+import java.util.Map;
 /**
  * Hello world!
  *
  */
+
 public class App
 {
-public static boolean isManipulatedRow(String row) {
-        // Check if the row is null or empty
-        if (row == null || row.trim().isEmpty()) {
-                return true;
-        }
-
-        // Check if the message is empty or contains "null" or "n.a."
-        if (row.trim().isEmpty() || row.trim().equalsIgnoreCase("null") || row.trim().equalsIgnoreCase("n.a.")) {
-                return true;
-        }
-
-                // Create a list of expected field names
-        List<String> expectedFieldNames = Arrays.asList("index", "operationendtime", "toolid", "machine", "process",
-                "p1datapoint1", "p1datapoint2", "p2datapoint1", "p2datapoint2", "p3datapoint1", "p3datapoint2",
-                "p4datapoint1", "p4datapoint2", "p5datapoint1", "p5datapoint2", "p6datapoint1", "p6datapoint2",
-                "p7datapoint1", "p7datapoint2", "p8datapoint1", "p8datapoint2");
-
+ public static boolean isManipulatedRow(String jsonString) {
         try {
-                // Parse the JSON row
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jsonNode = mapper.readTree(row);
+            // Parse JSON string into a Map
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> row = mapper.readValue(jsonString, Map.class);
 
-                // Check if any of the expected fields are missing
-                for (String fieldName : expectedFieldNames) {
-                if (!jsonNode.has(fieldName)) {
-                        return true;
+            // Check if any value is null
+            for (Object value : row.values()) {
+                if (value == null) {
+                    return true;
                 }
-                }
+            }
+            return false;
         } catch (Exception e) {
-                // Log or handle the exception if necessary
-                return true;
+            // Handle parsing errors
+            e.printStackTrace();
+            return false;
         }
-
-        return false;
-        }
+    }
 
 public static void main(String[] args) throws Exception {
         ParameterTool parameter = ParameterTool.fromArgs(args);
