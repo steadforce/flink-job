@@ -139,7 +139,7 @@ public static void main(String[] args) throws Exception {
             }
         });
 
-        DataStream<JobData> mappedCompleteStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
+        DataStream<JobData> mappedCompleteStream = completeRowsStream.map(new MapFunction<String, JobData>() {
             @Override
             public JobData map(String value) throws Exception {
                 // perform your mapping logic here and return a JobData instance
