@@ -150,7 +150,7 @@ public static void main(String[] args) throws Exception {
 
         // Convert the DataStream to a Table
         Table manipulated_table = tableEnv.fromDataStream(mappedManipulatedStream, $("id"), $("data"));
-        Table complete_table = tableEnv.fromDataStream(mappedCompleteStream, $("value").as("data"));
+        Table complete_table = tableEnv.fromDataStream(mappedCompleteStream,$("id"), $("data"));
 
         // Register the Table as a temporary view
         //tableEnv.createTemporaryView("my_complete_table", complete_table);
@@ -170,15 +170,15 @@ public static void main(String[] args) throws Exception {
         // Write Table to Iceberg
 
        
-        // manipulated_table.executeInsert("db.manipulated_table");
-        // // Write Table to Iceberg
-        // complete_table.executeInsert("db.complete_table");
+        manipulated_table.executeInsert("db.manipulated_table");
+        // Write Table to Iceberg
+        complete_table.executeInsert("db.complete_table");
         // Write the DataStream to the tables
-        tableEnv.executeSql(
-               "INSERT INTO db.complete_table SELECT * FROM my_complete_table limit 10");
+        // tableEnv.executeSql(
+        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table limit 10");
 
-        tableEnv.executeSql(
-               "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table limit 10");
+        // tableEnv.executeSql(
+        //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table limit 10");
         // Execute the job
         env.execute("Flink Job");
    }
