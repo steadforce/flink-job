@@ -154,7 +154,7 @@ public static void main(String[] args) throws Exception {
         //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
 
         
-        System.print.out("test");
+        System.out.println("test");
         // Execute the job
         env.execute("Flink Job");
    }
