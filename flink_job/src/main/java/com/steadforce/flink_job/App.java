@@ -34,24 +34,8 @@ import java.util.Map;
 
 public class App
 {
- public static boolean isManipulatedRow(String jsonString) {
-        try {
-            // Parse JSON string into a Map
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> row = mapper.readValue(jsonString, Map.class);
-
-            // Check if any value is null
-            for (Object value : row.values()) {
-                if (value == null) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (Exception e) {
-            // Handle parsing errors
-            e.printStackTrace();
-            return false;
-        }
+ public static boolean isManipulatedRow(String jsonString, Random random) {
+        return random.nextBoolean();
     }
 
 public static void main(String[] args) throws Exception {
@@ -113,9 +97,9 @@ public static void main(String[] args) throws Exception {
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
         // // Filter manipulated and complete rows
-        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
-        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
         Random random = new Random();
+        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row, random));
+        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row, random));
         // apply a map transformation to convert the Tuple2 to an JobData object
         DataStream<JobData> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
             @Override
