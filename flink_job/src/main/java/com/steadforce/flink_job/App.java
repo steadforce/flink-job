@@ -126,41 +126,36 @@ public static void main(String[] args) throws Exception {
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
 
-        // manipulatedRowsStream.print();
-        completeRowsStream.print();
+        //manipulatedRowsStream.print();
+        //completeRowsStream.print();
 
-        // System.out.println("MANIPULATED");
-        // System.out.println(manipulatedRowsStream);
-        // System.out.println("COMPLETE");
-        // System.out.println(completeRowsStream);
+        // Convert the DataStream to a Table
+        Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
+        Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
 
-        // // Convert the DataStream to a Table
-        // Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
-        // Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
+        // Register the Table as a temporary view
+        tableEnv.createTemporaryView("my_complete_table", complete_table);
+        tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
-        // // Register the Table as a temporary view
-        // tableEnv.createTemporaryView("my_complete_table", complete_table);
-        // tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
+        Create the tables
+        tableEnv.executeSql(
+               "CREATE TABLE IF NOT EXISTS db.complete_table ("
+                       + "id BIGINT COMMENT 'unique id',"
+                       + "data STRING"
+                       + ")");
 
-        // Create the tables
-        //tableEnv.executeSql(
-        //        "CREATE TABLE IF NOT EXISTS db.complete_table ("
-        //                + "id BIGINT COMMENT 'unique id',"
-        //                + "data STRING"
-        //                + ")");
+        tableEnv.executeSql(
+               "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
+                      + "id BIGINT COMMENT 'unique id',"
+                       + "data STRING"
+                       + ")");
 
-        //tableEnv.executeSql(
-        //        "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-        //               + "id BIGINT COMMENT 'unique id',"
-        //                + "data STRING"
-        //                + ")");
+        Write the DataStream to the tables
+        tableEnv.executeSql(
+               "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
-        // Write the DataStream to the tables
-        //tableEnv.executeSql(
-        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
-
-        //tableEnv.executeSql(
-        //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
+        tableEnv.executeSql(
+               "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
 
         // Execute the job
         env.execute("Flink Job");
