@@ -153,8 +153,8 @@ public static void main(String[] args) throws Exception {
         Table complete_table = tableEnv.fromDataStream(mappedCompleteStream,$("id"), $("data"));
 
         // Register the Table as a temporary view
-        //tableEnv.createTemporaryView("my_complete_table", complete_table);
-        //tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
+        tableEnv.createTemporaryView("my_complete_table", complete_table);
+        tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
         // Create the tables
         tableEnv.executeSql(
