@@ -137,7 +137,7 @@ public static void main(String[] args) throws Exception {
         tableEnv.createTemporaryView("my_complete_table", complete_table);
         tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
-        Create the tables
+        // Create the tables
         tableEnv.executeSql(
                "CREATE TABLE IF NOT EXISTS db.complete_table ("
                        + "id BIGINT COMMENT 'unique id',"
@@ -150,7 +150,7 @@ public static void main(String[] args) throws Exception {
                        + "data STRING"
                        + ")");
 
-        Write the DataStream to the tables
+        // Write the DataStream to the tables
         tableEnv.executeSql(
                "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
