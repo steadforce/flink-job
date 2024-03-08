@@ -128,9 +128,18 @@ public static void main(String[] args) throws Exception {
 
         //manipulatedRowsStream.print();
         //completeRowsStream.print();
+        // apply a map transformation to convert the Tuple2 to an JobData object
+        DataStream<JobData> mappedStream = manipulatedRowsStream.map(new MapFunction<Tuple2<Long, String>, JobData>() {
+            @Override
+            public JobData map(Tuple2<Long, String> value) throws Exception {
+                // perform your mapping logic here and return a JobData instance
+                // for example:
+                return new JobData(value.f0, value.f1);
+            }
+        });
 
         // Convert the DataStream to a Table
-        Table manipulated_table = tableEnv.fromDataStream(manipulatedRowsStream, $("value").as("data"));
+        Table manipulated_table = tableEnv.fromDataStream(mappedStream, $("id"), $("data"));
         //Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
 
         // Register the Table as a temporary view
