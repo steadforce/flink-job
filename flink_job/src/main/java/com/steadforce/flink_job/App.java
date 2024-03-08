@@ -127,55 +127,56 @@ public static void main(String[] args) throws Exception {
 
         // // Filter manipulated and complete rows
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
+        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        Random random = new Random();
+        // apply a map transformation to convert the Tuple2 to an JobData object
+        DataStream<JobData> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
+            @Override
+            public JobData map(String value) throws Exception {
+                // perform your mapping logic here and return a JobData instance
+                // for example:
+                return new JobData(random.nextLong(), value);
+            }
+        });
 
-        
-        //DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
-        // Random random = new Random();
-        System.out.print("BEFORE PRINT");
-        
-        manipulatedRowsStream.print();
+        DataStream<JobData> mappedCompleteStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
+            @Override
+            public JobData map(String value) throws Exception {
+                // perform your mapping logic here and return a JobData instance
+                // for example:
+                return new JobData(random.nextLong(), value);
+            }
+        });
 
-        System.out.print("AFTER PRINT");
-        // //completeRowsStream.print();
-        // // apply a map transformation to convert the Tuple2 to an JobData object
-        // DataStream<JobData> mappedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
-        //     @Override
-        //     public JobData map(String value) throws Exception {
-        //         // perform your mapping logic here and return a JobData instance
-        //         // for example:
-        //         return new JobData(random.nextLong(), value);
-        //     }
-        // });
+        // Convert the DataStream to a Table
+        Table manipulated_table = tableEnv.fromDataStream(mappedManipulatedStream, $("id"), $("data"));
+        Table complete_table = tableEnv.fromDataStream(mappedCompleteStream, $("value").as("data"));
 
-        // // Convert the DataStream to a Table
-        // Table manipulated_table = tableEnv.fromDataStream(mappedStream, $("id"), $("data"));
-        // //Table complete_table = tableEnv.fromDataStream(completeRowsStream, $("value").as("data"));
+        // Register the Table as a temporary view
+        //tableEnv.createTemporaryView("my_complete_table", complete_table);
+        //tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
-        // // Register the Table as a temporary view
-        // //tableEnv.createTemporaryView("my_complete_table", complete_table);
-        // tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
-
-        // // Create the tables
-        // // tableEnv.executeSql(
-        // //        "CREATE TABLE IF NOT EXISTS db.complete_table ("
-        // //                + "id BIGINT COMMENT 'unique id',"
-        // //                + "data STRING"
-        // //                + ")");
-        // System.out.println("Creating table in iceberg ...");
+        // Create the tables
+        tableEnv.executeSql(
+               "CREATE TABLE IF NOT EXISTS db.complete_table ("
+                       + "id BIGINT COMMENT 'unique id',"
+                       + "data STRING"
+                       + ")");
+        tableEnv.executeSql(
+               "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
+                      + "id BIGINT COMMENT 'unique id',"
+                       + "data STRING"
+                       + ")");
+        // Write Table to Iceberg
+        processedTable.executeInsert("db.manipulated_table");
+        // Write Table to Iceberg
+        processedTable.executeInsert("db.complete_table");
+        // Write the DataStream to the tables
         // tableEnv.executeSql(
-        //        "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-        //               + "id BIGINT COMMENT 'unique id',"
-        //                + "data STRING"
-        //                + ")");
+        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
-        // // Write the DataStream to the tables
-        // // tableEnv.executeSql(
-        // //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
-        // System.out.println("Inserting data ...");
         // tableEnv.executeSql(
         //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
-
-        // System.out.println("Executing job ...");
         // Execute the job
         env.execute("Flink Job");
    }
