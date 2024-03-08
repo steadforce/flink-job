@@ -159,7 +159,7 @@ public static void main(String[] args) throws Exception {
 
         tableEnv.executeSql(
                "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-                      + "id BIGINT COMMENT 'unique id',"
+                      + "id STRING COMMENT 'unique id',"
                        + "data STRING"
                        + ")");
 
