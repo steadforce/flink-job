@@ -24,7 +24,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.UUID;
+import java.util.Random;
 /**
  * Hello world!
  *
@@ -128,7 +128,7 @@ public static void main(String[] args) throws Exception {
         // // Filter manipulated and complete rows
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         //DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
-
+        Random random = new Random();
         //manipulatedRowsStream.print();
         //completeRowsStream.print();
         // apply a map transformation to convert the Tuple2 to an JobData object
@@ -137,8 +137,7 @@ public static void main(String[] args) throws Exception {
             public JobData map(String value) throws Exception {
                 // perform your mapping logic here and return a JobData instance
                 // for example:
-                String uuid = UUID.randomUUID().toString();
-                return new JobData(uuid, value);
+                return new JobData(random.nextLong(), value);
             }
         });
 
@@ -159,7 +158,7 @@ public static void main(String[] args) throws Exception {
 
         tableEnv.executeSql(
                "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-                      + "id STRING COMMENT 'unique id',"
+                      + "id BIGINT COMMENT 'unique id',"
                        + "data STRING"
                        + ")");
 
