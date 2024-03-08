@@ -46,7 +46,9 @@ public static void main(String[] args) throws Exception {
         String kafkaSchemaRegistryUrl = System.getenv("KAFKA_SCHEMA_REGISTRY_URL");
         String kafkaConsumerGroup = System.getenv("KAFKA_CONSUMER_GROUP");
 
-
+        String nessieHost = System.getenv("NESSIE_HOST");
+        String warehouse = System.getenv("WAREHOUSE");
+        String minioHost = System.getenv("MINIO_HOST");
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -156,5 +158,5 @@ public static void main(String[] args) throws Exception {
         env.execute("Flink Job");
    }
 
-
+   
 }
