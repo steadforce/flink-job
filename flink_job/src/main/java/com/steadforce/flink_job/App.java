@@ -2,6 +2,8 @@ package com.steadforce.flink_job;
 
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -22,6 +24,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 /**
  * Hello world!
  *
@@ -129,12 +132,13 @@ public static void main(String[] args) throws Exception {
         //manipulatedRowsStream.print();
         //completeRowsStream.print();
         // apply a map transformation to convert the Tuple2 to an JobData object
-        DataStream<JobData> mappedStream = manipulatedRowsStream.map(new MapFunction<Tuple2<Long, String>, JobData>() {
+        DataStream<JobData> mappedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
             @Override
-            public JobData map(Tuple2<Long, String> value) throws Exception {
+            public JobData map(String value) throws Exception {
                 // perform your mapping logic here and return a JobData instance
                 // for example:
-                return new JobData(value.f0, value.f1);
+                String uuid = UUID.randomUUID().toString();
+                return new JobData(uuid, value);
             }
         });
 

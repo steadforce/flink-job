@@ -1,22 +1,22 @@
 package com.steadforce.flink_job;
 
 public class JobData {
-   private Long id;
+   private String id;
    private String data;
 
    public JobData() {
    }
 
-   public JobData(Long id, String data) {
+   public JobData(String id, String data) {
        this.id = id;
        this.data = data;
    }
 
-   public Long getId() {
+   public String getId() {
        return id;
    }
 
-   public void setId(Long id) {
+   public void setId(String id) {
        this.id = id;
    }
 
