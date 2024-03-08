@@ -129,7 +129,7 @@ public static void main(String[] args) throws Exception {
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
         //DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
         Random random = new Random();
-        //manipulatedRowsStream.print();
+        manipulatedRowsStream.print();
         //completeRowsStream.print();
         // apply a map transformation to convert the Tuple2 to an JobData object
         DataStream<JobData> mappedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
@@ -155,7 +155,7 @@ public static void main(String[] args) throws Exception {
         //                + "id BIGINT COMMENT 'unique id',"
         //                + "data STRING"
         //                + ")");
-
+        System.out.println("Creating table in iceberg ...");
         tableEnv.executeSql(
                "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
                       + "id BIGINT COMMENT 'unique id',"
@@ -165,10 +165,11 @@ public static void main(String[] args) throws Exception {
         // Write the DataStream to the tables
         // tableEnv.executeSql(
         //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
-
+        System.out.println("Inserting data ...");
         tableEnv.executeSql(
                "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
 
+        System.out.println("Executing job ...");
         // Execute the job
         env.execute("Flink Job");
    }
