@@ -3,30 +3,20 @@ package com.steadforce.flink_job;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.GlobalConfiguration;
-import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-
 import static org.apache.flink.table.api.Expressions.$;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 import java.util.Random;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Iterator;
-import java.util.Map;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 /**
  * Hello world!
  *
@@ -34,16 +24,23 @@ import java.util.Map;
 
 public class App
 {
- public static boolean isManipulatedRow(String jsonString, Random random) {
-        return random.nextBoolean();
+ public static boolean isManipulatedRow(String jsonString) {
+    JsonElement jsonElement = JsonParser.parseString(jsonString);
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            for (String key : jsonObject.keySet()) {
+                if (jsonObject.get(key).isJsonNull()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 public static void main(String[] args) throws Exception {
-        ParameterTool parameter = ParameterTool.fromArgs(args);
 
         String kafkaBootstrapServers = System.getenv("KAFKA_BOOTSTRAP_SERVERS");
         String kafkaTopic = System.getenv("KAFKA_TOPIC");
-        String kafkaSchemaRegistryUrl = System.getenv("KAFKA_SCHEMA_REGISTRY_URL");
         String kafkaConsumerGroup = System.getenv("KAFKA_CONSUMER_GROUP");
 
         String nessieHost = System.getenv("NESSIE_HOST");
@@ -99,8 +96,10 @@ public static void main(String[] args) throws Exception {
 
         // // Filter manipulated and complete rows
         Random random = new Random();
-        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row, random));
-        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row, random));
+        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
+         manipulatedRowsStream.print("Manipulated Rows");
+        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
+        completeRowsStream.print("Complete Rows");
         // apply a map transformation to convert the Tuple2 to an JobData object
         DataStream<JobData> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
             @Override
