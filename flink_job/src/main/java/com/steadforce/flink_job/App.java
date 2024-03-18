@@ -94,12 +94,11 @@ public static void main(String[] args) throws Exception {
         // Add Kafka source as a data source
         DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
-        // // Filter manipulated and complete rows
-        Random random = new Random();
+        // Filter manipulated and complete rows
         DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
-         manipulatedRowsStream.print("Manipulated Rows");
         DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
-        completeRowsStream.print("Complete Rows");
+        
+        Random random = new Random();
         // apply a map transformation to convert the Tuple2 to an JobData object
         DataStream<JobData> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
             @Override
@@ -127,36 +126,11 @@ public static void main(String[] args) throws Exception {
         tableEnv.createTemporaryView("my_complete_table", complete_table);
         tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
 
-        // Create the tables
-        tableEnv.executeSql(
-               "CREATE TABLE IF NOT EXISTS db.complete_table ("
-                       + "id BIGINT COMMENT 'unique id',"
-                       + "data STRING"
-                       + ")");
-        tableEnv.executeSql(
-               "CREATE TABLE IF NOT EXISTS db.manipulated_table ("
-                      + "id BIGINT COMMENT 'unique id',"
-                       + "data STRING"
-                       + ")");
         // Write Table to Iceberg
-
-       
-        // // Write Table to Iceberg
         manipulated_table.executeInsert("db.manipulated_table");
         complete_table.executeInsert("db.complete_table");
-        
-        // Write the DataStream to the tables
-        // tableEnv.executeSql(
-        //        "INSERT INTO db.complete_table SELECT * FROM my_complete_table");
 
-        // tableEnv.executeSql(
-        //        "INSERT INTO db.manipulated_table SELECT * FROM my_manipulated_table");
-
-        
-        System.out.println("test");
         // Execute the job
         env.execute("Flink Job");
    }
-
-   
 }

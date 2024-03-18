@@ -13,7 +13,9 @@ RUN curl -L https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.6
     ## AWS Bundled Classes
     curl -L https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.25.1/bundle-2.25.1.jar -o /opt/flink/lib/bundle-2.25.1.jar && \
     ## Kafka Connector
-    curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.1.0-1.17/flink-sql-connector-kafka-3.1.0-1.17.jar  -o /opt/flink/lib/flink-sql-connector-kafka-3.1.0-1.17.jar 
+    curl -L https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-kafka/3.1.0-1.17/flink-sql-connector-kafka-3.1.0-1.17.jar  -o /opt/flink/lib/flink-sql-connector-kafka-3.1.0-1.17.jar && \
+    ## Google JSON Parser
+    curl -L https://repo1.maven.org/maven2/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar -o /opt/flink/lib/gson-2.9.1.jar
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
