@@ -81,170 +81,83 @@ public class App
         );
         
         Catalog catalog = catalogLoader.loadCatalog();
-        TableIdentifier outputTable = TableIdentifier.of(
-            "db",
-            "table1");
-        if (!catalog.tableExists(outputTable)) {
-            catalog.createTable(outputTable, schema, PartitionSpec.unpartitioned());
-        }
-        // set up the execution environment
+        
+        // Set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.enableCheckpointing(5000);
+
+        // Create KafkaSource builder
+        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
+                .setBootstrapServers(kafkaBootstrapServers)
+                .setGroupId(kafkaConsumerGroup)
+                .setTopics(kafkaTopic)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setValueOnlyDeserializer(new SimpleStringSchema())
+                .build();
+
+        // Add Kafka source as a data source
+        DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
+
+        // Filter manipulated and complete rows
+        DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
+        DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
         
-        // create a DataStream of Tuple2 (equivalent to Row of 2 fields)
-        DataStream<Tuple2<Long, String>> source = env.fromElements(
-               Tuple2.of(1L, "foo"),
-               Tuple2.of(1L, "bar"),
-               Tuple2.of(1L, "baz"));
-               
-        // apply a map transformation to convert the Tuple2 to an JobData object
-        DataStream<Row> stream = source.map(new MapFunction<Tuple2<Long, String>, Row>()
+        Random random = new Random();
+
+        DataStream<Row> mappedCompleteStream = completeRowsStream.map(new MapFunction<String, Row>()
         {
             @Override
-            public Row map(Tuple2<Long, String> value) throws Exception {
+            public Row map(String value) throws Exception {
                 Row row = new Row(2);
-                row.setField(0, value.f0);
-                row.setField(1, value.f1);
+                row.setField(0, random.nextLong());
+                row.setField(1, value);
                 return row;
            }
         });
 
+        // Apply a map transformation to convert the Tuple2 to an JobData object
+        DataStream<Row> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, Row>()
+        {
+            @Override
+            public Row map(String value) throws Exception {
+                Row row = new Row(2);
+                row.setField(0, random.nextLong());
+                row.setField(1, value);
+                return row;
+           }
+        });
+        String completeTableName = "complete_data";
+        String manipulatedTableName = "manipulated_data";
+        String schemaName = "db";
+        TableIdentifier completeDataTable = TableIdentifier.of(
+            schemaName,
+            completeTableName);
+        if (!catalog.tableExists(completeDataTable)) {
+            catalog.createTable(completeDataTable, schema, PartitionSpec.unpartitioned());
+        }
+
+        TableIdentifier manipulatedDataTable = TableIdentifier.of(
+            schemaName,
+            manipulatedTableName);
+        if (!catalog.tableExists(manipulatedDataTable)) {
+            catalog.createTable(manipulatedDataTable, schema, PartitionSpec.unpartitioned());
+        }
+
         // Configure row-based append
-        FlinkSink.forRow(stream, FlinkSchemaUtil.toSchema(schema))
-            .tableLoader(TableLoader.fromCatalog(catalogLoader, outputTable))
+        FlinkSink.forRow(mappedCompleteStream, FlinkSchemaUtil.toSchema(schema))
+            .tableLoader(TableLoader.fromCatalog(catalogLoader, completeDataTable))
+            .distributionMode(DistributionMode.HASH)
+            .writeParallelism(2)
+            .append();
+
+        // Configure row-based append
+        FlinkSink.forRow(mappedManipulatedStream, FlinkSchemaUtil.toSchema(schema))
+            .tableLoader(TableLoader.fromCatalog(catalogLoader, manipulatedDataTable))
             .distributionMode(DistributionMode.HASH)
             .writeParallelism(2)
             .append();
 
         // Execute the flink app
         env.execute();
-        
-        // // set up the table environment
-        // final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(
-        //         env,
-        //         EnvironmentSettings.newInstance().inStreamingMode().build()
-        // );
-
-        // // Create KafkaSource builder
-        // KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
-        //         .setBootstrapServers(kafkaBootstrapServers)
-        //         .setGroupId(kafkaConsumerGroup)
-        //         .setTopics(kafkaTopic)
-        //         .setStartingOffsets(OffsetsInitializer.earliest())
-        //         .setValueOnlyDeserializer(new SimpleStringSchema())
-        //         .build();
-
-        // // create the Nessie catalog
-        // tableEnv.executeSql(
-        //         String.format(
-        //         "CREATE CATALOG iceberg WITH ("
-        //                 + "'type'='iceberg',"
-        //                 + "'catalog-impl'='org.apache.iceberg.nessie.NessieCatalog',"
-        //                 + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-        //                 + "'uri'='%s',"
-        //                 + "'authentication.type'='none',"
-        //                 + "'ref'='main',"
-        //                 + "'client.assume-role.region'='us-east-1',"
-        //                 + "'warehouse'='%s',"
-        //                 + "'s3.endpoint'='%s'"
-        //                 + ")", nessieHost, warehouse, minioHost));
-
-        // // create the Nessie catalog
-        // tableEnv.executeSql(
-        //     "CREATE CATALOG iceberg WITH ("
-        //             + "'type'='iceberg',"
-        //             + "'catalog-impl'='org.apache.iceberg.rest.RESTCatalog',"
-        //             + "'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',"
-        //             + "'uri'='http://rest:8181',"
-        //             + "'client.assume-role.region'='us-east-1',"
-        //             + "'warehouse'='s3://warehouse/wh/',"
-        //             + "'s3.endpoint'='http://minio:9000'"
-        //             + ")");
-
-        // // List all catalogs
-        // TableResult result = tableEnv.executeSql("SHOW CATALOGS");
-
-        // // Print the result to standard out
-        // result.print();
-
-        // // Set the current catalog to the new catalog
-        // tableEnv.useCatalog("iceberg");
-
-        // // Create a database in the current catalog
-        // tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS db");
-
-        // // create the table
-        // tableEnv.executeSql(
-        //        "CREATE TABLE IF NOT EXISTS db.table1 ("
-        //                + "id BIGINT COMMENT 'unique id',"
-        //                + "data STRING"
-        //                + ")");
-
-        // // create a DataStream of Tuple2 (equivalent to Row of 2 fields)
-        // DataStream<Tuple2<Long, String>> dataStream = env.fromElements(
-        //        Tuple2.of(1L, "foo"),
-        //        Tuple2.of(1L, "bar"),
-        //        Tuple2.of(1L, "baz"));
-        // // apply a map transformation to convert the Tuple2 to an JobData object
-        // DataStream<JobData> mappedStream = dataStream.map(new MapFunction<Tuple2<Long, String>, JobData>() {
-        //     @Override
-        //     public JobData map(Tuple2<Long, String> value) throws Exception {
-        //         // perform your mapping logic here and return a JobData instance
-        //         // for example:
-        //         return new JobData(value.f0, value.f1);
-        //     }
-        // });
-
-        // // convert the DataStream to a Table
-        // Table table = tableEnv.fromDataStream(mappedStream, $("id"), $("data"));
-
-        // // register the Table as a temporary view
-        // tableEnv.createTemporaryView("my_datastream", table);
-
-        // // write the DataStream to the table
-        // tableEnv.executeSql(
-        //         "INSERT INTO db.table1 SELECT * FROM my_datastream");
-
-        // // Add Kafka source as a data source
-        // DataStream<String> kafkaStream = env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source");
-
-        // // Filter manipulated and complete rows
-        // DataStream<String> manipulatedRowsStream = kafkaStream.filter(row -> isManipulatedRow(row));
-        // DataStream<String> completeRowsStream = kafkaStream.filter(row -> !isManipulatedRow(row));
-        
-        // Random random = new Random();
-        // // apply a map transformation to convert the Tuple2 to an JobData object
-        // DataStream<JobData> mappedManipulatedStream = manipulatedRowsStream.map(new MapFunction<String, JobData>() {
-        //     @Override
-        //     public JobData map(String value) throws Exception {
-        //         // perform your mapping logic here and return a JobData instance
-        //         // for example:
-        //         return new JobData(random.nextLong(), value);
-        //     }
-        // });
-
-        // DataStream<JobData> mappedCompleteStream = completeRowsStream.map(new MapFunction<String, JobData>() {
-        //     @Override
-        //     public JobData map(String value) throws Exception {
-        //         // perform your mapping logic here and return a JobData instance
-        //         // for example:
-        //         return new JobData(random.nextLong(), value);
-        //     }
-        // });
-
-        // // Convert the DataStream to a Table
-        // Table manipulated_table = tableEnv.fromDataStream(mappedManipulatedStream, $("id"), $("data"));
-        // Table complete_table = tableEnv.fromDataStream(mappedCompleteStream,$("id"), $("data"));
-
-        // // Register the Table as a temporary view
-        // tableEnv.createTemporaryView("my_complete_table", complete_table);
-        // tableEnv.createTemporaryView("my_manipulated_table", manipulated_table);
-
-        // // Write Table to Iceberg
-        // manipulated_table.executeInsert("db.manipulated_table");
-        // complete_table.executeInsert("db.complete_table");
-
-        // Execute the job
-        // env.execute("Flink Job");
    }
 }

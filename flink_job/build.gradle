@@ -9,19 +9,21 @@ group = 'com.steadforce'
 version = '0.0.1'
 mainClassName = 'com.steadforce.flink_job.App'
 description = "Streaming data from kafka to iceberg"
+
+compileJava {
+  options.release.set(11)
+}
+
 ext {
-    javaVersion = '1.8'
-    flinkVersion = '1.16.1'
-    flinkShortVersion = '1.16'
+    flinkVersion = '1.17.2'
+    flinkShortVersion = '1.17'
     scalaBinaryVersion = '_2.12'
     slf4jVersion = '1.7.36'
     log4jVersion = '2.17.1'
-    icebergVersion = '1.2.1'
-    hadoopVersion = '3.3.2'
-    tabularVersion = '1.4.3'
+    icebergVersion = '1.4.3'
+    hadoopVersion = '3.3.6'
 }
-sourceCompatibility = javaVersion
-targetCompatibility = javaVersion
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
@@ -57,8 +59,6 @@ dependencies {
     flinkShadowJar "org.apache.iceberg:iceberg-flink-runtime-${flinkShortVersion}:${icebergVersion}"
     flinkShadowJar "org.apache.hadoop:hadoop-common:${hadoopVersion}" // needed by Iceberg Flink
     flinkShadowJar "org.apache.flink:flink-sql-connector-kafka:${flinkVersion}"
-    flinkShadowJar "io.tabular:tabular-client:${tabularVersion}" // test
-    flinkShadowJar group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2' //test
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
     // shadow (uber) jar and are provided in the lib folder of Flink
@@ -68,8 +68,6 @@ dependencies {
     implementation "org.apache.flink:flink-table-runtime:${flinkVersion}"
     implementation "org.apache.iceberg:iceberg-flink-runtime-${flinkShortVersion}:${icebergVersion}"
     implementation "org.apache.hadoop:hadoop-common:${hadoopVersion}" // needed by Iceberg Flink
-    implementation "io.tabular:tabular-client:${tabularVersion}" // test
-    implementation group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2' //test
     // 
     runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
     runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
