@@ -15,12 +15,16 @@ import org.apache.flink.types.Row;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.iceberg.DistributionMode;
 import org.apache.iceberg.Schema;
-import org.apache.iceberg.catalog.Catalog;
+//import org.apache.iceberg.catalog.Catalog;
 import org.apache.iceberg.catalog.TableIdentifier;
 import org.apache.iceberg.flink.CatalogLoader;
 import org.apache.iceberg.flink.FlinkSchemaUtil;
 import org.apache.iceberg.flink.TableLoader;
 import org.apache.iceberg.flink.sink.FlinkSink;
+import org.apache.iceberg.catalog.Namespace;
+import org.apache.iceberg.flink.FlinkCatalog;
+import org.apache.flink.table.catalog.Catalog;
+import org.apache.iceberg.flink.TableLoader;
 
 import org.apache.flink.table.api.Table;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -79,12 +83,21 @@ public class App
             Types.NestedField.required(1, "id", Types.LongType.get()),
             Types.NestedField.required(2, "data", Types.StringType.get())
         );
+        String completeTableName = "complete_data";
+        String manipulatedTableName = "manipulated_data";
+        String schemaName = "db";
+
+        Catalog catalog = new FlinkCatalog("iceberg", schemaName, Namespace.empty(), catalogLoader, true, -1);
         
-        Catalog catalog = catalogLoader.loadCatalog();
+        //Catalog catalog = catalogLoader.loadCatalog();
         
         // Set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
         env.enableCheckpointing(5000);
+
+        tableEnv.registerCatalog("iceberg", catalog);
+        tableEnv.useCatalog("iceberg");
 
         // Create KafkaSource builder
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
@@ -126,22 +139,25 @@ public class App
                 return row;
            }
         });
-        String completeTableName = "complete_data";
-        String manipulatedTableName = "manipulated_data";
-        String schemaName = "db";
-        TableIdentifier completeDataTable = TableIdentifier.of(
-            schemaName,
-            completeTableName);
-        if (!catalog.tableExists(completeDataTable)) {
-            catalog.createTable(completeDataTable, schema, PartitionSpec.unpartitioned());
-        }
+
+
+        String createDatabaseSql = String.format("CREATE DATABASE IF NOT EXISTS %s;", schemaName);
+        tableEnv.executeSql(createDatabaseSql);
+
+        String createTableSqlComplete = String.format("CREATE TABLE IF NOT EXISTS %s.%s (id BIGINT, data STRING)", schemaName, completeTableName);
+        String createTableSqlManipulated = String.format("CREATE TABLE IF NOT EXISTS %s.%s (id BIGINT, data STRING)", schemaName, manipulatedTableName);
+
+        tableEnv.executeSql(createTableSqlComplete);
+        tableEnv.executeSql(createTableSqlManipulated);
 
         TableIdentifier manipulatedDataTable = TableIdentifier.of(
             schemaName,
             manipulatedTableName);
-        if (!catalog.tableExists(manipulatedDataTable)) {
-            catalog.createTable(manipulatedDataTable, schema, PartitionSpec.unpartitioned());
-        }
+
+        
+        TableIdentifier completeDataTable = TableIdentifier.of(
+            schemaName,
+            completeTableName);
 
         // Configure row-based append
         FlinkSink.forRow(mappedCompleteStream, FlinkSchemaUtil.toSchema(schema))
