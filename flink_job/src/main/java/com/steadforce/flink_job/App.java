@@ -141,7 +141,6 @@ public class App
            }
         });
 
-
         String createDatabaseSql = String.format("CREATE DATABASE IF NOT EXISTS %s;", schemaName);
         tableEnv.executeSql(createDatabaseSql);
 
@@ -154,7 +153,6 @@ public class App
         TableIdentifier manipulatedDataTable = TableIdentifier.of(
             schemaName,
             manipulatedTableName);
-
         
         TableIdentifier completeDataTable = TableIdentifier.of(
             schemaName,

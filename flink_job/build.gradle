@@ -15,7 +15,7 @@ compileJava {
 }
 
 ext {
-    flinkVersion = '1.17.2'
+    flinkVersion = '1.17.2-stream1'
     flinkShortVersion = '1.17'
     scalaBinaryVersion = '_2.12'
     slf4jVersion = '1.7.36'
@@ -42,6 +42,12 @@ repositories {
             snapshotsOnly()
         }
     }
+    maven {
+        url 'https://maven.ververica.com/artifactory/vvp-flink-release/'
+        mavenContent {
+            releasesOnly()
+        }
+    }
 }
 // NOTE: We cannot use "compileOnly" or "shadow" configurations since then we could not run code
 // in the IDE or with "gradle run". We also cannot exclude transitive dependencies from the
@@ -59,15 +65,15 @@ configurations {
 dependencies {
     flinkShadowJar "org.apache.iceberg:iceberg-flink-runtime-${flinkShortVersion}:${icebergVersion}"
     flinkShadowJar "org.apache.hadoop:hadoop-common:${hadoopVersion}" // needed by Iceberg Flink
-    flinkShadowJar "org.apache.flink:flink-sql-connector-kafka:${flinkVersion}"
+    flinkShadowJar "com.ververica.flink:flink-sql-connector-kafka:${flinkVersion}"
     flinkShadowJar "io.tabular:tabular-client:${tabularVersion}"
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
     // shadow (uber) jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
-    implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
-    implementation "org.apache.flink:flink-clients:${flinkVersion}"
-    implementation "org.apache.flink:flink-table-runtime:${flinkVersion}"
+    implementation "com.ververica.flink:flink-streaming-java:${flinkVersion}"
+    implementation "com.ververica.flink:flink-clients:${flinkVersion}"
+    implementation "com.ververica.flink:flink-table-runtime:${flinkVersion}"
     implementation "org.apache.iceberg:iceberg-flink-runtime-${flinkShortVersion}:${icebergVersion}"
     implementation "io.tabular:tabular-client:${tabularVersion}"
     implementation "org.apache.hadoop:hadoop-common:${hadoopVersion}" // needed by Iceberg Flink
