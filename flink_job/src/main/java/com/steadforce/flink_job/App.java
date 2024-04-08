@@ -43,6 +43,7 @@ import com.google.gson.JsonParser;
 public class App
 {
     public static boolean isManipulatedRow(String jsonString) {
+        System.out.println(jsonString);
         JsonElement jsonElement = JsonParser.parseString(jsonString);
             if (jsonElement.isJsonObject()) {
                 JsonObject jsonObject = jsonElement.getAsJsonObject();
