@@ -23,6 +23,8 @@ ext {
     icebergVersion = '1.4.3'
     hadoopVersion = '3.3.6'
     tabularVersion = "1.4.3"
+    vvrVersion = '1.17-vvr-8.0.4-1'
+    flinkVersionNoStream = '1.17.2'
 }
 
 tasks.withType(JavaCompile) {
@@ -70,6 +72,9 @@ dependencies {
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
     // shadow (uber) jar and are provided in the lib folder of Flink
+    implementation "org.apache.flink:flink-java:${flinkVersionNoStream}"
+	implementation "com.alibaba.ververica:ververica-connector-kafka:${vvrVersion}"
+	implementation "com.alibaba.ververica:ververica-connector-common:${vvrVersion}"
     // --------------------------------------------------------------
     implementation "com.ververica.flink:flink-streaming-java:${flinkVersion}"
     implementation "com.ververica.flink:flink-clients:${flinkVersion}"
