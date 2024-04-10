@@ -1,4 +1,4 @@
-FROM flink:1.17.2-scala_2.12-java
+FROM flink:1.17.2-scala_2.12-java8
 
     ## Hadoop Common Classes
 RUN curl -L https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.6/hadoop-common-3.3.6.jar -o /opt/flink/lib/hadoop-common-3.3.6.jar && \
